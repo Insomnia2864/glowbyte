@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Random;
 
 @Slf4j
 @Service
@@ -18,7 +19,9 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class OffersService
 {
-    static long PAGE_SIZE = 1000000;
+    static long PAGE_SIZE = 1000;
+    static String BASE_FIO = "FIO";
+    static Random rnd = new Random();
 
     OfferRepository offerRepository;
 
@@ -40,6 +43,20 @@ public class OffersService
         }
 
         log.info("Total sent data: {}", sentCount);
+    }
+
+    @Transactional
+    public void fillData(Long size)
+    {
+        for (long i = 0; i < size; i++)
+        {
+            Offer offer = Offer
+                    .builder()
+                    .clientFIO(BASE_FIO + rnd.nextInt())
+                    .exposable(rnd.nextBoolean())
+                    .build();
+            offerRepository.insertData(offer);
+        }
     }
 
     private void sendData(List<Offer> offers)

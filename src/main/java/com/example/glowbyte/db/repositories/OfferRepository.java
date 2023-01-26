@@ -15,8 +15,9 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class OfferRepository
 {
-    static String COUNT_QUERY = "select count(*) from offers;";
-    static String SELECT_PARTIAL_DATA = "select * from offers limit %s offset %s;";
+    static String COUNT_QUERY = "select count(*) from test.offer;";
+    static String SELECT_PARTIAL_DATA = "select * from test.offer limit %s offset %s;";
+    static String INSERT_DATA = "insert into test.offer (exposable, client_fio) values (%s, '%s');";
     JdbcTemplate jdbcTemplate;
 
     public Long getDataCount()
@@ -27,7 +28,13 @@ public class OfferRepository
     public List<Offer> partialSelect(Long pageSize, Long currentOffset)
     {
         String actualQuery = String.format(SELECT_PARTIAL_DATA, pageSize, currentOffset);
-        return jdbcTemplate.query(SELECT_PARTIAL_DATA, fullRowMapper());
+        return jdbcTemplate.query(actualQuery, fullRowMapper());
+    }
+
+    public void insertData(Offer offer)
+    {
+        String actualQuery = String.format(INSERT_DATA, mapExposable(offer.getExposable()), offer.getClientFIO());
+        jdbcTemplate.execute(actualQuery);
     }
 
     private RowMapper<Offer> fullRowMapper()
@@ -47,5 +54,9 @@ public class OfferRepository
     private Boolean mapExposable(Integer exposable)
     {
         return exposable != 0;
+    }
+    private Integer mapExposable(Boolean exposable)
+    {
+        return exposable ? 1 : 0;
     }
 }
