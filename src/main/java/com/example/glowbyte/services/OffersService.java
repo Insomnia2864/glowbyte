@@ -19,7 +19,7 @@ import java.util.Random;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class OffersService
 {
-    static long PAGE_SIZE = 1000;
+    static long PAGE_SIZE = 100000;
     static String BASE_FIO = "FIO";
     static Random rnd = new Random();
 
