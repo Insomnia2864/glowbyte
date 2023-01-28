@@ -5,9 +5,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -35,7 +35,7 @@ public class OffersController
     }
 
     @PutMapping
-    public ResponseEntity fillRandomData(@RequestParam(value = "size") Long size)
+    public ResponseEntity fillRandomData(@RequestParam(value = "size") @NonNull Integer size)
     {
         try
         {

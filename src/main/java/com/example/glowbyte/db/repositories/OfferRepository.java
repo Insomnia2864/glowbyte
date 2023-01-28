@@ -6,9 +6,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 @RequiredArgsConstructor
@@ -16,25 +20,34 @@ import java.util.List;
 public class OfferRepository
 {
     static String COUNT_QUERY = "select count(*) from test.offer;";
-    static String SELECT_PARTIAL_DATA = "select * from test.offer limit %s offset %s;";
-    static String INSERT_DATA = "insert into test.offer (exposable, client_fio) values (%s, '%s');";
-    JdbcTemplate jdbcTemplate;
-
+    static String SELECT_PARTIAL_DATA = "select * from test.offer where exposable = 1;";
+    static String INSERT_DATA = "insert into test.offer (exposable, client_fio) values (:exposable, :clientFio);";
+    DataSource dataSource;
+    NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     public Long getDataCount()
     {
+        JdbcTemplate jdbcTemplate = namedParameterJdbcTemplate.getJdbcTemplate();
         return jdbcTemplate.queryForObject(COUNT_QUERY, rowMapperCount());
     }
 
     public List<Offer> partialSelect(Long pageSize, Long currentOffset)
     {
-        String actualQuery = String.format(SELECT_PARTIAL_DATA, pageSize, currentOffset);
-        return jdbcTemplate.query(actualQuery, fullRowMapper());
+        String actualQuery = String.format(SELECT_PARTIAL_DATA);
+        return namedParameterJdbcTemplate.query(actualQuery, fullRowMapper());
     }
 
-    public void insertData(Offer offer)
+    public void insertDataBatch(List<Offer> offers)
     {
-        String actualQuery = String.format(INSERT_DATA, mapExposable(offer.getExposable()), offer.getClientFIO());
-        jdbcTemplate.execute(actualQuery);
+        Map<String, Object>[] params = offers.stream()
+                        .map(offer ->
+                        {
+                            Map<String, Object> param = new HashMap<>();
+                            param.put("exposable", offer.getExposable());
+                            param.put("clientFio", offer.getClientFIO());
+                            return param;
+                        }).toArray(HashMap[]::new);
+
+        namedParameterJdbcTemplate.batchUpdate(INSERT_DATA, params);
     }
 
     private RowMapper<Offer> fullRowMapper()

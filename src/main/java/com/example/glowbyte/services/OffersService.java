@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -25,7 +26,8 @@ public class OffersService
 
     OfferRepository offerRepository;
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    // использовался serialized, чтобы во время выполнения транзакция не было новых записей, если фантомные чтения не проблема, то repeatable read подойдет
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void sendData()
     {
         Long dataCount = offerRepository.getDataCount();
@@ -46,17 +48,35 @@ public class OffersService
     }
 
     @Transactional
-    public void fillData(Long size)
+    public void fillData(Integer size)
     {
-        for (long i = 0; i < size; i++)
-        {
-            Offer offer = Offer
-                    .builder()
-                    .clientFIO(BASE_FIO + rnd.nextInt())
-                    .exposable(rnd.nextBoolean())
-                    .build();
-            offerRepository.insertData(offer);
-        }
+        long start = System.currentTimeMillis();
+
+        List<Offer> offers = Arrays.stream(new Integer[size])
+                .map(i -> Offer.builder()
+                        .clientFIO(BASE_FIO + rnd.nextInt())
+                        .exposable(getNextExposable())
+                        .build())
+                .toList();
+
+        offerRepository.insertDataBatch(offers);
+
+//        for (int i = 0; i < size; i++)
+//        {
+//            Offer offer = Offer
+//                    .builder()
+//                    .clientFIO(BASE_FIO + rnd.nextInt())
+//                    .exposable(getNextExposable())
+//                    .build();
+//            offerRepository.insertData(offer);
+//        }
+
+        log.debug("Times spent on insert {}", System.currentTimeMillis() - start);
+    }
+
+    private boolean getNextExposable()
+    {
+        return rnd.nextInt(10) == 0;
     }
 
     private void sendData(List<Offer> offers)
