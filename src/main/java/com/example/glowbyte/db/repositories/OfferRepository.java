@@ -24,6 +24,7 @@ public class OfferRepository
     static String INSERT_DATA = "insert into test.offer (exposable, client_fio) values (:exposable, :clientFio);";
     DataSource dataSource;
     NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
     public Long getDataCount()
     {
         JdbcTemplate jdbcTemplate = namedParameterJdbcTemplate.getJdbcTemplate();
@@ -38,7 +39,7 @@ public class OfferRepository
     public void insertDataBatch(List<Offer> offers)
     {
         MapSqlParameterSource[] params = new MapSqlParameterSource[offers.size()];
-        for(int i = 0; i < offers.size(); i++)
+        for (int i = 0; i < offers.size(); i++)
         {
             MapSqlParameterSource param = new MapSqlParameterSource();
             param.addValue("exposable", offers.get(i).getExposable(), Types.NUMERIC);
@@ -48,6 +49,7 @@ public class OfferRepository
 
         namedParameterJdbcTemplate.batchUpdate(INSERT_DATA, params);
     }
+
     public void insertData(Offer offer)
     {
         MapSqlParameterSource param = new MapSqlParameterSource();
@@ -76,6 +78,7 @@ public class OfferRepository
     {
         return exposable != 0;
     }
+
     private Integer mapExposable(Boolean exposable)
     {
         return exposable ? 1 : 0;

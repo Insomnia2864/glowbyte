@@ -26,8 +26,7 @@ public class OffersController
         {
             offersService.sendData();
             return new ResponseEntity(HttpStatus.OK);
-        }
-        catch (Exception exception)
+        } catch (Exception exception)
         {
             log.error("Error occurred processing send offers request", exception);
             return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -41,8 +40,7 @@ public class OffersController
         {
             offersService.fillData(size);
             return new ResponseEntity(HttpStatus.OK);
-        }
-        catch (Exception exception)
+        } catch (Exception exception)
         {
             log.error("Error occurred filling Data", exception);
             return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
