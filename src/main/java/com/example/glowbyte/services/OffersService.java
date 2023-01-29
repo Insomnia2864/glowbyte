@@ -54,31 +54,31 @@ public class OffersService
     public void fillData(Integer size)
     {
         long start = System.currentTimeMillis();
-//        long iterationCounter = 1;
-//        while (size != 0)
-//        {
-//            log.info("Iteration number {}", iterationCounter++);
-//            Integer currentValue = Math.min(size, PAGE_SIZE);
-//            List<Offer> offers = Arrays.stream(new Integer[currentValue])
-//                    .map(i -> Offer.builder()
-//                            .clientFIO(BASE_FIO + rnd.nextInt())
-//                            .exposable(getNextExposable())
-//                            .build())
-//                    .toList();
-//
-//            offerRepository.insertDataBatch(offers);
-//            size -= currentValue;
-//        }
-
-        for (int i = 0; i < size; i++)
+        long iterationCounter = 1;
+        while (size != 0)
         {
-            Offer offer = Offer
-                    .builder()
-                    .clientFIO(BASE_FIO + rnd.nextInt())
-                    .exposable(getNextExposable())
-                    .build();
-            offerRepository.insertData(offer);
+            log.info("Iteration number {}", iterationCounter++);
+            int currentValue = Math.min(size, PAGE_SIZE);
+            List<Offer> offers = Arrays.stream(new Integer[currentValue])
+                    .map(i -> Offer.builder()
+                            .clientFIO(BASE_FIO + rnd.nextInt())
+                            .exposable(getNextExposable())
+                            .build())
+                    .toList();
+
+            offerRepository.insertDataBatch(offers);
+            size -= currentValue;
         }
+
+//        for (int i = 0; i < size; i++)
+//        {
+//            Offer offer = Offer
+//                    .builder()
+//                    .clientFIO(BASE_FIO + rnd.nextInt())
+//                    .exposable(getNextExposable())
+//                    .build();
+//            offerRepository.insertData(offer);
+//        }
 
         log.info("Times spent on insert {}", System.currentTimeMillis() - start);
     }
