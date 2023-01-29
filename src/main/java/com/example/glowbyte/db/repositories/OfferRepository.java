@@ -4,13 +4,11 @@ import com.example.glowbyte.db.entities.Offer;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import javax.sql.DataSource;
 import java.sql.Types;
 import java.util.List;
 
@@ -22,14 +20,7 @@ public class OfferRepository
     static String COUNT_QUERY = "select count(*) from test.offer;";
     static String SELECT_DATA = "select * from test.offer where exposable = 1;"; // хотел считать данные порционно, не знаю, стоит ли выгружать в память одним запросов 10 млн записей
     static String INSERT_DATA = "insert into test.offer (exposable, client_fio) values (:exposable, :clientFio);";
-    DataSource dataSource;
     NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-
-    public Long getDataCount()
-    {
-        JdbcTemplate jdbcTemplate = namedParameterJdbcTemplate.getJdbcTemplate();
-        return jdbcTemplate.queryForObject(COUNT_QUERY, rowMapperCount());
-    }
 
     public List<Offer> selectAll()
     {
