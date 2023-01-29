@@ -30,21 +30,8 @@ public class OffersService
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void sendData()
     {
-        Long dataCount = offerRepository.getDataCount();
-        long sentCount = 0L;
-
-        for (long currentOffset = 0L; currentOffset < dataCount; currentOffset+=PAGE_SIZE)
-        {
-            List<Offer> offers = offerRepository.selectAll().stream()
-                    .filter(Offer::getExposable)
-                    .toList();
-
-            sentCount += offers.size();
-
-            sendData(offers);
-        }
-
-        log.info("Total sent data: {}", sentCount);
+        List<Offer> offers = offerRepository.selectAll();
+        sendData(offers);
     }
 
 
