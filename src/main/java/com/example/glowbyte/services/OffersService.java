@@ -20,7 +20,7 @@ import java.util.Random;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class OffersService
 {
-    static long PAGE_SIZE = 100000;
+    static int PAGE_SIZE = 100000;
     static String BASE_FIO = "FIO";
     static Random rnd = new Random();
 
@@ -35,7 +35,7 @@ public class OffersService
 
         for (long currentOffset = 0L; currentOffset < dataCount; currentOffset+=PAGE_SIZE)
         {
-            List<Offer> offers = offerRepository.partialSelect(PAGE_SIZE, currentOffset).stream()
+            List<Offer> offers = offerRepository.selectAll().stream()
                     .filter(Offer::getExposable)
                     .toList();
 
@@ -47,31 +47,40 @@ public class OffersService
         log.info("Total sent data: {}", sentCount);
     }
 
+
+    // batch insert 14637 ms for 1m
+    // single insert 280197 ms for 1m
     @Transactional
     public void fillData(Integer size)
     {
         long start = System.currentTimeMillis();
-
-        List<Offer> offers = Arrays.stream(new Integer[size])
-                .map(i -> Offer.builder()
-                        .clientFIO(BASE_FIO + rnd.nextInt())
-                        .exposable(getNextExposable())
-                        .build())
-                .toList();
-
-        offerRepository.insertDataBatch(offers);
-
-//        for (int i = 0; i < size; i++)
+//        long iterationCounter = 1;
+//        while (size != 0)
 //        {
-//            Offer offer = Offer
-//                    .builder()
-//                    .clientFIO(BASE_FIO + rnd.nextInt())
-//                    .exposable(getNextExposable())
-//                    .build();
-//            offerRepository.insertData(offer);
+//            log.info("Iteration number {}", iterationCounter++);
+//            Integer currentValue = Math.min(size, PAGE_SIZE);
+//            List<Offer> offers = Arrays.stream(new Integer[currentValue])
+//                    .map(i -> Offer.builder()
+//                            .clientFIO(BASE_FIO + rnd.nextInt())
+//                            .exposable(getNextExposable())
+//                            .build())
+//                    .toList();
+//
+//            offerRepository.insertDataBatch(offers);
+//            size -= currentValue;
 //        }
 
-        log.debug("Times spent on insert {}", System.currentTimeMillis() - start);
+        for (int i = 0; i < size; i++)
+        {
+            Offer offer = Offer
+                    .builder()
+                    .clientFIO(BASE_FIO + rnd.nextInt())
+                    .exposable(getNextExposable())
+                    .build();
+            offerRepository.insertData(offer);
+        }
+
+        log.info("Times spent on insert {}", System.currentTimeMillis() - start);
     }
 
     private boolean getNextExposable()
