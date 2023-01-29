@@ -30,7 +30,7 @@ public class OfferRepository
         return jdbcTemplate.queryForObject(COUNT_QUERY, rowMapperCount());
     }
 
-    public List<Offer> partialSelect(Long pageSize, Long currentOffset)
+    public List<Offer> selectAll()
     {
         String actualQuery = String.format(SELECT_PARTIAL_DATA);
         return namedParameterJdbcTemplate.query(actualQuery, fullRowMapper());
@@ -42,12 +42,20 @@ public class OfferRepository
                         .map(offer ->
                         {
                             Map<String, Object> param = new HashMap<>();
-                            param.put("exposable", offer.getExposable());
+                            param.put("exposable", mapExposable(offer.getExposable()));
                             param.put("clientFio", offer.getClientFIO());
                             return param;
                         }).toArray(HashMap[]::new);
 
         namedParameterJdbcTemplate.batchUpdate(INSERT_DATA, params);
+    }
+
+    public void insertData(Offer offer)
+    {
+        Map<String, Object> param = new HashMap<>();
+        param.put("exposable", mapExposable(offer.getExposable()));
+        param.put("clientFio", offer.getClientFIO());
+        namedParameterJdbcTemplate.update(INSERT_DATA, param);
     }
 
     private RowMapper<Offer> fullRowMapper()
